@@ -46,15 +46,21 @@ async def command_start_handler(message: Message) -> None:
 async def language_selection(message: Message) -> None:
     selected_language = message.text
     if selected_language == "Русский":
-        await message.answer("Отлично! Теперь ты будешь получать цитаты на русском языке. Напиши /quote чтобы получить цитату.")
+        await message.answer("Отлично! Теперь ты будешь получать цитаты на русском языке. Напиши /quote чтобы получить цитату. Если захочешь сменить язык, напиши English или Русский")
         user_lang[message.from_user.id] = "RU"
     elif selected_language == "English":
         user_lang[message.from_user.id] = "EN"
-        await message.answer("Great! Now you will receive quotes in English. Type /quote to get a quote.")
+        await message.answer("Great! Now you will receive quotes in English. Type /quote to get a quote. If you want to chage the language, type English or Русский")
     print(f"Пользователь {message.from_user.full_name} с айди {message.from_user.id} выбрал язык {selected_language}.")
 
-@dp.message(Command("quote"))
+@dp.message(Command(commands=["quote", "next"]))
 async def quote(message: Message) -> None:
+    gkeyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="/next")]  
+    ],
+    resize_keyboard=True 
+)
     print(f"Пользователь {message.from_user.full_name} с айди {message.from_user.id} запросил цитату.")
     user_id = message.from_user.id
     print("ошибка после создания user_id")
@@ -78,9 +84,9 @@ async def quote(message: Message) -> None:
         if isinstance(temp, str) and " — " in temp:
             print(type(temp), temp, len(temp))
             quotea, author = temp.rsplit(" — ", 1)
-            await message.answer(f"💬{quotea.strip()}\n- 👤{author.strip()}")
+            await message.answer(f"💬{quotea.strip()}\n- 👤{author.strip()}", reply_markup=gkeyboard)
         elif isinstance(temp, str):
-            await message.answer(temp)
+            await message.answer(temp, reply_markup=gkeyboard)
    
         
 async def main() -> None:

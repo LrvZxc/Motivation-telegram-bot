@@ -61,28 +61,31 @@ async def quote(message: Message) -> None:
     ],
     resize_keyboard=True 
 )
-    print(f"Пользователь {message.from_user.full_name} с айди {message.from_user.id} запросил цитату.")
+    
     user_id = message.from_user.id
-    print("ошибка после создания user_id")
+   
     if user_id not in user_lang:
-        print("ошибка после проверки user_id")
+ 
         await message.answer("Please select a language first by typing /start.")
         return
     if user_lang[message.from_user.id] == "RU":
-        print("ошибка после проверки языка")
+     
         file_path = "C:\\Users\\marat\\OneDrive\\Рабочий стол\\тгБот\\Motivation-telegram-bot\\RuQuotes.txt"
+
     elif user_lang[message.from_user.id] == "EN":
-        print("ошибка после проверки языка 1")
+        
         file_path = "C:\\Users\\marat\\OneDrive\\Рабочий стол\\тгБот\\Motivation-telegram-bot\\Quotes.txt"
-    print("норм после проверки языка")
+  
     
     with open(file_path, "r", encoding="utf-8") as file:
         import random
+
         quotes = [line.strip() for line in file if line.strip()]
         temp = random.choice(quotes)
-        print(type(temp), temp)
+      
+        
         if isinstance(temp, str) and " — " in temp:
-            print(type(temp), temp, len(temp))
+          
             quotea, author = temp.rsplit(" — ", 1)
             await message.answer(f"💬{quotea.strip()}\n- 👤{author.strip()}", reply_markup=gkeyboard)
         elif isinstance(temp, str):

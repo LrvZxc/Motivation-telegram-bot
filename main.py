@@ -18,15 +18,16 @@ load_dotenv()
 TOKEN = os.getenv("Token") 
 
 
-
-dp = Dispatcher()
 RU = False
-EN = False
+EN = True
+user_lang = {}
+dp = Dispatcher()
+
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    global RU, EN
-    print(f"Пользователь {message.from_user.full_name} запустил бота.")
+   
+    print(f"Пользователь {message.from_user.id} запустил бота.")
     
     keyboard = ReplyKeyboardMarkup(
     keyboard=[
@@ -39,37 +40,39 @@ async def command_start_handler(message: Message) -> None:
     one_time_keyboard=True
 )
     
-    await message.answer(f"""Ну привет, {html.bold(message.from_user.full_name)}. Я бот который может тебя мотивировать\
+    await message.answer(f"""Ну привет, {html.bold(message.from_user.full_name)}. Я бот который может тебя мотивировать\n
                         напиши /quote и я залью мотивации\n
                         Для начала, напиши язык на котором ты хочешь видеть цитаты""", reply_markup=keyboard) 
-    while RU == False and EN == False:
-        await message.answer("Выбери язык", reply_markup=keyboard)
-    user_lang = {}
-    if message.text == "Русский":
-      
+    
+@dp.message(lambda message: message.text in ["Русский", "English"])
+async def language_selection(message: Message) -> None:
+    selected_language = message.text
+    if selected_language == "Русский":
+        await message.answer("Отлично! Теперь ты будешь получать цитаты на русском языке. Напиши /quote чтобы получить цитату.")
         user_lang[message.from_user.id] = "RU"
-        
-        await message.answer("Отлично! Теперь ты будешь получать цитаты на русском языке. Напиши /quote чтобы получить первую цитату.")
-    elif message.text == "English":
-
-        user_lang = {}
+    elif selected_language == "English":
         user_lang[message.from_user.id] = "EN"
-      
-        await message.answer("Great! Now you will receive quotes in English. Type /quote to get your first quote.")
+        await message.answer("Great! Now you will receive quotes in English. Type /quote to get a quote.")
+
 @dp.message(Command("quote"))
 async def quote(message: Message) -> None:
-    global RU, EN
-    if EN:
-        file_path = "C:\\Users\\marat\\OneDrive\\Рабочий стол\\тгБот\\Motivation-telegram-bot\\Quotes.txt"
-    elif RU:
+ 
+        
+    if user_lang[message.from_user.id] == "RU":
+        
         file_path = "C:\\Users\\marat\\OneDrive\\Рабочий стол\\тгБот\\Motivation-telegram-bot\\RuQuotes.txt"
-    
+    elif user_lang[message.from_user.id] == "EN":
+        file_path = "C:\\Users\\marat\\OneDrive\\Рабочий стол\\тгБот\\Motivation-telegram-bot\\Quotes.txt"
+    else:
+        await message.answer("Please select a language first by typing /start.")
+
         with open(file_path, "r", encoding="utf-8") as file:
             import random
             quotes = [line.strip() for line in file if line.strip()]
             temp = random.choice(quotes)
             print(type(temp), temp)
             if isinstance(temp, str) and " — " in temp:
+                print(type(temp), temp, len(temp))
                 quotea, author = temp.rsplit(" — ", 1)
                 await message.answer(f"💬{quotea.strip()}\n- 👤{author.strip()}")
             elif isinstance(temp, str):
